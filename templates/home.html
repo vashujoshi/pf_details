@@ -1,12 +1,26 @@
 <!DOCTYPE html>
 <html>
-<head><title>PF Tracker</title></head>
+<head>
+    <title>PF Tracker - Companies</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
 <body>
-    <h1>PF Tracker - Companies</h1>
-    <ul>
-    {% for company in companies %}
-        <li><a href="/company/{{ company.id }}/">{{ company.name }}</a></li>
-    {% endfor %}
-    </ul>
+    <header>
+        <h1>PF Tracker</h1>
+        <nav>
+            <a href="/">Home</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Companies</h2>
+        <ul>
+        {% for company in companies %}
+            <li><a href="/company/{{ company.id }}/">{{ company.name }}</a></li>
+        {% endfor %}
+        </ul>
+    </main>
+    <footer>
+        &copy; 2024 PF Tracker. All rights reserved.
+    </footer>
 </body>
 </html>
