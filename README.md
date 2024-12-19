@@ -179,6 +179,9 @@ The database is populated in two primary ways:
 1. Ensure that the necessary files (`pf_sample.xlsx` and `pf_details.xml`) are present in the project directory.
 2. Start the server:
    ```bash
+     uv run pf_tracker.py 
+   ```
+   ```bash
    nanodjango manage pf_tracker.py runserver
    ```
 3. Open the browser and visit `http://localhost:8000` to view the application.
