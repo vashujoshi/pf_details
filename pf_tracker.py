@@ -20,9 +20,9 @@ app = Django(
         'django.contrib.contenttypes',
         'django.contrib.staticfiles',
         'django.contrib.admin',  # Admin functionality
-        'django.contrib.auth',  # Required for permissions and users
-        'django.contrib.sessions',  # Session management
-        'django.contrib.messages',  # Required for messages framework
+        'django.contrib.auth',  
+        'django.contrib.sessions',  
+        'django.contrib.messages',  
     ],
     TEMPLATES=[
         {
@@ -34,7 +34,7 @@ app = Django(
                     'django.template.context_processors.debug',
                     'django.template.context_processors.request',
                     'django.contrib.auth.context_processors.auth',
-                    'django.contrib.messages.context_processors.messages',  # Required for messages
+                    'django.contrib.messages.context_processors.messages',  
                 ],
             },
         }
@@ -42,7 +42,7 @@ app = Django(
     STATICFILES_DIRS=[
         os.path.join(os.getcwd(), 'static'),
     ],
-    STATIC_URL='/static/',  # Specify static URL
+    STATIC_URL='/static/',  # files which are shown ex css
 )
 
 # Models
