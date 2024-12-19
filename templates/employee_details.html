@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head><title>{{ employee.name }}</title></head>
+<body>
+    <h1>{{ employee.name }}</h1>
+    <p>PF Number: {{ employee.pf_number }}</p>
+    <p>Company: {{ employee.company.name }}</p>
+    <h2>Payments</h2>
+    <table border="1">
+        <tr>
+            <th>Month</th>
+            <th>Employee Contribution</th>
+            <th>Employer Contribution</th>
+            <th>Total Contribution</th>
+        </tr>
+        {% for payment in payments %}
+        <tr>
+            <td>{{ payment.month|date:"F Y" }}</td>
+            <td>{{ payment.employee_contribution }}</td>
+            <td>{{ payment.employer_contribution }}</td>
+            <td>{{ payment.total_contribution }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

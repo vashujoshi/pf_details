@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head><title>PF Tracker</title></head>
+<body>
+    <h1>PF Tracker - Companies</h1>
+    <ul>
+    {% for company in companies %}
+        <li><a href="/company/{{ company.id }}/">{{ company.name }}</a></li>
+    {% endfor %}
+    </ul>
+</body>
+</html>
