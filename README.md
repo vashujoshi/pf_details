@@ -8,6 +8,12 @@ This application manages Provident Fund (PF) data for employees and companies. I
 
 ---
 ![image](https://github.com/user-attachments/assets/7dcae44c-8b7e-4511-90f9-c311e43b917e)
+![image](https://github.com/user-attachments/assets/a7a267c9-7432-434a-bda7-7ef213046025)
+![image](https://github.com/user-attachments/assets/ca8f432c-182f-448d-9ef5-7ec7fc9f4fb7)
+![image](https://github.com/user-attachments/assets/d0e2c0df-34f0-417c-8f1d-d8c3451ab4a4)
+
+
+
 
 
 ### **1. Application Setup**
