@@ -3,6 +3,7 @@ from django.db import models
 from django.core.management.base import BaseCommand
 from django.shortcuts import render
 from nanodjango import Django
+import pandas as pd
 
 # Initialize nanodjango app
 app = Django(
@@ -47,7 +48,7 @@ class Company(models.Model):
     name = models.CharField(max_length=200, unique=True)
     registration_number = models.CharField(max_length=50, unique=True)
     address = models.TextField(blank=True)
-    hello = models.TextField(blank=True)
+    pf_account_number = models.CharField(max_length=100, unique=True, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -77,64 +78,56 @@ class PFPayment(models.Model):
         self.total_contribution = self.employee_contribution + self.employer_contribution
         super().save(*args, **kwargs)
 
-
 # Management Command for PF Data Fetching
 class Command(BaseCommand):
-    help = 'Fetch and store PF data from a hypothetical API'
+    help = 'Fetch and store PF details from Excel'
 
     def handle(self, *args, **options):
-        # Simulated data fetching
-        sample_data = [
-            {
-                'company': {
-                    'name': 'Tech Innovations Pvt Ltd',
-                    'registration_number': 'COMP12345',
-                    'address': '123 Tech Park, Bangalore'
-                },
-                'employees': [
-                    {
-                        'name': 'John Doe',
-                        'pf_number': 'PF98765',
-                        'date_of_joining': '2020-01-15',
-                        'payments': [
-                            {
-                                'month': '2024-01-01',
-                                'employee_contribution': 1500,
-                                'employer_contribution': 1500
-                            }
-                        ]
-                    }
-                ]
-            }
-        ]
+        # Load Excel file
+        excel_file = os.path.join(os.getcwd(), 'pf_sample.xlsx')
+        if not os.path.exists(excel_file):
+            self.stderr.write(f"Error: Excel file '{excel_file}' not found.")
+            return
 
-        for company_data in sample_data:
-            company, _ = Company.objects.get_or_create(
-                registration_number=company_data['company']['registration_number'],
-                defaults=company_data['company']
+        company_data = pd.read_excel(excel_file, sheet_name='Company Data')
+        employee_data = pd.read_excel(excel_file, sheet_name='Employee Data')
+        payment_data = pd.read_excel(excel_file, sheet_name='Payment Data')
+
+        # Process Company Data
+        for _, row in company_data.iterrows():
+            Company.objects.get_or_create(
+                registration_number=row['Registration Number'],
+                defaults={
+                    'name': row['Company Name'],
+                    'address': row['Address']
+                }
             )
 
-            for emp_data in company_data['employees']:
-                employee, _ = Employee.objects.get_or_create(
-                    pf_number=emp_data['pf_number'],
-                    defaults={
-                        'name': emp_data['name'],
-                        'company': company,
-                        'date_of_joining': emp_data['date_of_joining']
-                    }
-                )
+        # Process Employee Data
+        for _, row in employee_data.iterrows():
+            company = Company.objects.get(registration_number=row['Company Registration Number'])
+            Employee.objects.get_or_create(
+                pf_number=row['PF Number'],
+                defaults={
+                    'name': row['Employee Name'],
+                    'company': company,
+                    'date_of_joining': pd.to_datetime(row['Date of Joining']).date()
+                }
+            )
 
-                for payment_data in emp_data['payments']:
-                    PFPayment.objects.get_or_create(
-                        employee=employee,
-                        month=payment_data['month'],
-                        defaults={
-                            'employee_contribution': payment_data['employee_contribution'],
-                            'employer_contribution': payment_data['employer_contribution']
-                        }
-                    )
+        # Process Payment Data
+        for _, row in payment_data.iterrows():
+            employee = Employee.objects.get(pf_number=row['PF Number'])
+            PFPayment.objects.get_or_create(
+                employee=employee,
+                month=pd.to_datetime(row['Month']).date(),
+                defaults={
+                    'employee_contribution': row['Employee Contribution'],
+                    'employer_contribution': row['Employer Contribution']
+                }
+            )
 
-        self.stdout.write(self.style.SUCCESS('Successfully fetched and stored PF data'))
+        self.stdout.write(self.style.SUCCESS('Successfully fetched and stored PF data from Excel'))
 
 # Web Views
 @app.route("/")
