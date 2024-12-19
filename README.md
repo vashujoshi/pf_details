@@ -7,6 +7,8 @@ This application manages Provident Fund (PF) data for employees and companies. I
 3. **Web Views**: Routes that handle requests to fetch PF data and display company and employee information.
 
 ---
+![image](https://github.com/user-attachments/assets/7dcae44c-8b7e-4511-90f9-c311e43b917e)
+
 
 ### **1. Application Setup**
 The app is initialized using **Nanodjango**, which allows us to manage a lightweight Django-like application with minimal configuration. The settings define:
