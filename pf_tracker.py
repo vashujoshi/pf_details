@@ -2,6 +2,7 @@ import os
 import sys
 from django.db import models
 from django.core.management.base import BaseCommand
+from django.http import JsonResponse
 from django.shortcuts import render
 from nanodjango import Django
 import pandas as pd
@@ -81,7 +82,7 @@ class PFPayment(models.Model):
         super().save(*args, **kwargs)
 
 # Management Command for PF Data Fetching
-class Command(BaseCommand):
+class fetchpfdata(BaseCommand):
     help = 'Fetch and store PF details from Excel and XML'
 
     def handle(self, *args, **options):
@@ -180,6 +181,100 @@ def employee_detail(request, employee_id):
     employee = Employee.objects.get(id=employee_id)
     payments = employee.payments.all()
     return render(request, 'employee_detail.html', {'employee': employee, 'payments': payments})
+
+@app.route("/fetch_pf/")
+def fetch_pf_data_excel(request):
+    """
+    Fetch and store PF details from Excel file.
+    """
+    messages = []
+    success = True
+
+    # Define the path to the Excel file
+    excel_file = os.path.join(os.getcwd(), 'pf_sample.xlsx')
+    
+    # Check if the file exists
+    if os.path.exists(excel_file):
+        try:
+            # Try to read and process the Excel data
+            company_data = pd.read_excel(excel_file, sheet_name='Company Data')
+            employee_data = pd.read_excel(excel_file, sheet_name='Employee Data')
+            payment_data = pd.read_excel(excel_file, sheet_name='Payment Data')
+
+            # Process Company Data
+            for _, row in company_data.iterrows():
+                try:
+                    company, created = Company.objects.get_or_create(
+                        registration_number=row['Registration Number'],
+                        defaults={
+                            'name': row['Company Name'],
+                            'address': row['Address']
+                        }
+                    )
+                    if created:
+                        messages.append(f"Created company: {company.name}")
+                    else:
+                        messages.append(f"Company {company.name} already exists.")
+                except Exception as e:
+                    messages.append(f"Error processing company '{row['Company Name']}': {str(e)}")
+
+            # Process Employee Data
+            for _, row in employee_data.iterrows():
+                try:
+                    # Make sure the company exists
+                    company = Company.objects.get(registration_number=row['Company Registration Number'])
+                    employee, created = Employee.objects.get_or_create(
+                        pf_number=row['PF Number'],
+                        defaults={
+                            'name': row['Employee Name'],
+                            'company': company,
+                            'date_of_joining': pd.to_datetime(row['Date of Joining']).date()
+                        }
+                    )
+                    if created:
+                        messages.append(f"Created employee: {employee.name}")
+                    else:
+                        messages.append(f"Employee {employee.name} already exists.")
+                except Company.DoesNotExist:
+                    messages.append(f"Error: Company with registration number '{row['Company Registration Number']}' not found.")
+                except Exception as e:
+                    messages.append(f"Error processing employee '{row['Employee Name']}': {str(e)}")
+
+            # Process Payment Data
+            for _, row in payment_data.iterrows():
+                try:
+                    # Ensure the employee exists
+                    employee = Employee.objects.get(pf_number=row['PF Number'])
+                    payment, created = PFPayment.objects.get_or_create(
+                        employee=employee,
+                        month=pd.to_datetime(row['Month']).date(),
+                        defaults={
+                            'employee_contribution': row['Employee Contribution'],
+                            'employer_contribution': row['Employer Contribution']
+                        }
+                    )
+                    if created:
+                        messages.append(f"Created payment for employee: {employee.name}")
+                    else:
+                        messages.append(f"Payment for employee {employee.name} already exists for this month.")
+                except Employee.DoesNotExist:
+                    messages.append(f"Error: Employee with PF number '{row['PF Number']}' not found.")
+                except Exception as e:
+                    messages.append(f"Error processing payment for PF number '{row['PF Number']}': {str(e)}")
+
+            messages.append("Successfully processed data from Excel.")
+        except Exception as e:
+            success = False
+            messages.append(f"Error processing Excel file: {str(e)}")
+    else:
+        success = False
+        messages.append("Excel file 'pf_sample.xlsx' not found.")
+
+    # Return a simple JSON response (optional, could use rendering as well)
+    return JsonResponse({
+        'success': success,
+        'messages': messages
+    })
 
 # Run App
 if __name__ == "__main__":
