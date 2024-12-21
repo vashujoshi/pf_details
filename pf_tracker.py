@@ -283,3 +283,11 @@ if __name__ == "__main__":
     else:
         app.run(host="0.0.0.0:8000")
 
+#for running management command     
+#RUN SCRIPT
+# rest of script
+# if __name__ == "__main__":
+#     app._prepare()
+#     command = fetchpfdata()
+#     command.handle(arg1='value')
+
